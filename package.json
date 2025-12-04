@@ -1,0 +1,34 @@
+{
+  "name": "fhevm-examples-hub",
+  "version": "1.0.0",
+  "description": "Comprehensive FHEVM example generation system for Zama Bounty December 2025",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc --project cli/tsconfig.json",
+    "create-example": "ts-node cli/create-fhevm-example.ts",
+    "create-category": "ts-node cli/create-fhevm-category.ts",
+    "generate-docs": "ts-node cli/generate-docs.ts",
+    "generate-all": "npm run generate-docs && npm run create-category basics && npm run create-category advanced",
+    "test": "echo 'Run tests in individual examples' && exit 0"
+  },
+  "keywords": [
+    "fhevm",
+    "zama",
+    "privacy",
+    "encryption",
+    "homomorphic",
+    "lending",
+    "examples",
+    "bounty"
+  ],
+  "author": "FHEVM Examples Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "commander": "^11.0.0"
+  }
+}
