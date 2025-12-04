@@ -1,0 +1,19 @@
+Privacy Lending Platform  
+
+ 
+
+Meet Privacy Lending, a revolutionary peer-to-peer lending platform built on Zama's fully homomorphic encryption technology. This system enables secure, anonymous loans where sensitive data stays encrypted throughout every transaction.
+
+Borrowers can request loans with encrypted amounts, protecting their financial privacy from competitors and bad actors. The platform automatically calculates interest rates and repayment schedules on encrypted data without ever exposing the actual loan amounts.
+
+Credit scores are encrypted too, ensuring that risk assessments remain completely private. Lenders can confidently fund loans while borrowers maintain anonymity.
+
+The technical implementation demonstrates advanced FHE concepts: encrypted arithmetic for interest calculations, access control for granular permissions, and secure comparisons on encrypted values.
+
+Our CLI tools automatically generate standalone examples for each FHE concept, complete with comprehensive tests and documentation. The system provides a production-ready foundation for privacy-preserving financial applications.
+
+Built for the Zama Bounty Track 2025, Privacy Lending proves that powerful cryptography enables both privacy and practical functionality in decentralized finance.
+
+Experience true financial privacy with Privacy Lending.
+
+ 
