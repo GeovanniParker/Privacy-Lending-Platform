@@ -1,0 +1,33 @@
+{
+  "name": "fhevm-example-template",
+  "version": "1.0.0",
+  "description": "Base template for FHEVM examples",
+  "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.ts",
+    "coverage": "hardhat coverage"
+  },
+  "keywords": [
+    "fhevm",
+    "zama",
+    "encryption",
+    "privacy",
+    "hardhat",
+    "solidity"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@types/node": "^20.0.0",
+    "hardhat": "^2.19.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@fhevm/solidity": "^0.5.0",
+    "dotenv": "^16.0.0",
+    "ethers": "^6.0.0"
+  }
+}
