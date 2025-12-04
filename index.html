@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Lending Platform</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        // Fallback for ethers.js loading
+        if (typeof ethers === 'undefined') {
+            document.write('<script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"><\/script>');
+        }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e8e8e8;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(252, 163, 17, 0.2), transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(229, 62, 62, 0.2), transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: rgba(26, 32, 53, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(252, 163, 17, 0.2);
+        }
+
+        .header h1 {
+            color: #fca311;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            text-shadow: 0 0 20px rgba(252, 163, 17, 0.5);
+        }
+
+        .header p {
+            color: #e8e8e8;
+            font-size: 1.1rem;
+        }
+
+        .connection-status {
+            background: rgba(26, 32, 53, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid rgba(252, 163, 17, 0.2);
+        }
+
+        .connect-btn {
+            background: linear-gradient(45deg, #fca311, #e85d04);
+            color: #1a1a2e;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 25px rgba(252, 163, 17, 0.6);
+            background: linear-gradient(45deg, #ffba08, #fca311);
+        }
+
+        .connect-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .tab-container {
+            background: rgba(26, 32, 53, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(252, 163, 17, 0.2);
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid rgba(252, 163, 17, 0.3);
+        }
+
+        .tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #a0a0a0;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #fca311;
+            border-bottom-color: #fca311;
+        }
+
+        .tab:hover {
+            color: #fca311;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #fca311;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(252, 163, 17, 0.3);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: rgba(15, 52, 96, 0.5);
+            color: #e8e8e8;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #fca311;
+            box-shadow: 0 0 10px rgba(252, 163, 17, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #fca311, #e85d04);
+            color: #1a1a2e;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 25px rgba(252, 163, 17, 0.6);
+            background: linear-gradient(45deg, #ffba08, #fca311);
+        }
+
+        .btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #e85d04, #dc2f02);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 4px 25px rgba(232, 93, 4, 0.6);
+            background: linear-gradient(45deg, #f48c06, #e85d04);
+        }
+
+        .loan-card {
+            background: rgba(15, 52, 96, 0.6);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            border-left: 4px solid #fca311;
+            border: 1px solid rgba(252, 163, 17, 0.2);
+        }
+
+        .loan-card h3 {
+            color: #fca311;
+            margin-bottom: 10px;
+        }
+
+        .loan-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .loan-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(252, 163, 17, 0.2);
+            color: #e8e8e8;
+        }
+
+        .status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status.pending {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .status.approved {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+
+        .status.funded {
+            background: #bee3f8;
+            color: #2b6cb0;
+        }
+
+        .status.repaid {
+            background: #d6f5d6;
+            color: #22543d;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert.success {
+            background: rgba(72, 187, 120, 0.2);
+            color: #68d391;
+            border: 1px solid rgba(72, 187, 120, 0.4);
+        }
+
+        .alert.error {
+            background: rgba(229, 62, 62, 0.2);
+            color: #fc8181;
+            border: 1px solid rgba(229, 62, 62, 0.4);
+        }
+
+        .alert.info {
+            background: rgba(252, 163, 17, 0.2);
+            color: #fca311;
+            border: 1px solid rgba(252, 163, 17, 0.4);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(252, 163, 17, 0.2);
+            border-top: 3px solid #fca311;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Privacy Lending Platform</h1>
+            <p>Secure lending with Fully Homomorphic Encryption (FHE)</p>
+        </div>
+
+        <div class="connection-status">
+            <div id="walletInfo">
+                <button id="connectWallet" class="connect-btn">Connect Wallet</button>
+                <div id="accountInfo" class="hidden">
+                    <p><strong>Connected:</strong> <span id="accountAddress"></span></p>
+                    <p><strong>Network:</strong> <span id="networkName"></span></p>
+                    <p><strong>Balance:</strong> <span id="accountBalance"></span> ETH</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-container">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('borrow')">Borrow</button>
+                <button class="tab" onclick="showTab('lend')">Lend</button>
+                <button class="tab" onclick="showTab('platform')">Platform</button>
+                <button class="tab" onclick="showTab('loans')">My Loans</button>
+            </div>
+
+            <div id="borrowTab" class="tab-content active">
+                <h2>Request a Loan</h2>
+                <div id="borrowAlert"></div>
+                <form id="loanRequestForm">
+                    <div class="form-group">
+                        <label for="loanAmount">Loan Amount (ETH)</label>
+                        <input type="number" id="loanAmount" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loanDuration">Duration (Months)</label>
+                        <select id="loanDuration" required>
+                            <option value="">Select duration</option>
+                            <option value="1">1 Month</option>
+                            <option value="3">3 Months</option>
+                            <option value="6">6 Months</option>
+                            <option value="12">12 Months</option>
+                            <option value="24">24 Months</option>
+                            <option value="36">36 Months</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn" id="submitLoanBtn">
+                        <span class="loading hidden" id="loanLoading"></span>
+                        Request Loan
+                    </button>
+                </form>
+            </div>
+
+            <div id="lendTab" class="tab-content">
+                <h2>Lend Money</h2>
+                <div id="lendAlert"></div>
+
+                <div class="row">
+                    <div>
+                        <h3>Deposit Funds</h3>
+                        <form id="depositForm">
+                            <div class="form-group">
+                                <label for="depositAmount">Amount (ETH)</label>
+                                <input type="number" id="depositAmount" step="0.01" min="0.01" required>
+                            </div>
+                            <button type="submit" class="btn">
+                                <span class="loading hidden" id="depositLoading"></span>
+                                Deposit Funds
+                            </button>
+                        </form>
+                        <div id="lenderBalance" class="alert info" style="margin-top: 15px;">
+                            <strong>Your Deposits:</strong> <span id="lenderDepositAmount">0</span> ETH
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3>Fund a Loan</h3>
+                        <form id="fundLoanForm">
+                            <div class="form-group">
+                                <label for="fundLoanId">Loan ID</label>
+                                <input type="number" id="fundLoanId" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="fundAmount">Amount (ETH)</label>
+                                <input type="number" id="fundAmount" step="0.01" min="0.01" required>
+                            </div>
+                            <button type="submit" class="btn btn-secondary">
+                                <span class="loading hidden" id="fundLoading"></span>
+                                Fund Loan
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div id="platformTab" class="tab-content">
+                <h2>Platform Management</h2>
+                <div id="platformAlert"></div>
+
+                <div class="row">
+                    <div>
+                        <h3>Approve Loan</h3>
+                        <form id="approveLoanForm">
+                            <div class="form-group">
+                                <label for="approveLoanId">Loan ID</label>
+                                <input type="number" id="approveLoanId" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="interestRate">Interest Rate (basis points)</label>
+                                <input type="number" id="interestRate" min="300" max="3000" required>
+                                <small>300-3000 basis points (3%-30% annual)</small>
+                            </div>
+                            <button type="submit" class="btn">
+                                <span class="loading hidden" id="approveLoading"></span>
+                                Approve Loan
+                            </button>
+                        </form>
+                    </div>
+
+                    <div>
+                        <h3>Set Loan Amount</h3>
+                        <form id="setAmountForm">
+                            <div class="form-group">
+                                <label for="setAmountLoanId">Loan ID</label>
+                                <input type="number" id="setAmountLoanId" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="setAmountValue">Amount (ETH)</label>
+                                <input type="number" id="setAmountValue" step="0.01" min="0.01" required>
+                            </div>
+                            <button type="submit" class="btn btn-secondary">
+                                <span class="loading hidden" id="setAmountLoading"></span>
+                                Set Amount
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div id="loansTab" class="tab-content">
+                <h2>My Loans</h2>
+                <div id="loansAlert"></div>
+
+                <div class="row">
+                    <div>
+                        <h3>Loan Details</h3>
+                        <div class="form-group">
+                            <label for="searchLoanId">Search Loan ID</label>
+                            <input type="number" id="searchLoanId" min="1">
+                            <button type="button" class="btn" onclick="searchLoan()" style="margin-top: 10px;">
+                                Search Loan
+                            </button>
+                        </div>
+                        <div id="loanDetails"></div>
+                    </div>
+
+                    <div>
+                        <h3>Make Payment</h3>
+                        <form id="paymentForm">
+                            <div class="form-group">
+                                <label for="paymentLoanId">Loan ID</label>
+                                <input type="number" id="paymentLoanId" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="paymentAmount">Payment Amount (ETH)</label>
+                                <input type="number" id="paymentAmount" step="0.01" min="0.01" required>
+                            </div>
+                            <button type="submit" class="btn">
+                                <span class="loading hidden" id="paymentLoading"></span>
+                                Make Payment
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="borrowerLoans" style="margin-top: 30px;">
+                    <h3>Your Loans</h3>
+                    <div id="borrowerLoansList"></div>
+                    <button type="button" class="btn" onclick="loadBorrowerLoans()" style="margin-top: 15px;">
+                        Refresh Loans
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Contract configuration
+        const CONTRACT_ADDRESS = "0x7218D3da2FDe2065AE7846D8149fBD405C501E30";
+        const CONTRACT_ABI = [
+            "function requestLoan(uint32 _amount, uint256 _durationMonths) external",
+            "function approveLoan(uint32 _loanId, uint256 _interestRate) external",
+            "function setLoanAmount(uint32 _loanId, uint32 _amount) external",
+            "function depositFunds() external payable",
+            "function fundLoan(uint32 _loanId, uint32 _amount) external",
+            "function makePayment(uint32 _loanId) external payable",
+            "function getLoanInfo(uint32 _loanId) external view returns (address, bool, bool, bool)",
+            "function getBorrowerLoans(address _borrower) external view returns (uint32[] memory)",
+            "function lenderDeposits(address) external view returns (uint256)",
+            "function loans(uint32) external view returns (address, uint256, uint256, bool, bool, bool, uint256, address, uint256, uint256)",
+            "function currentLoanId() external view returns (uint32)",
+            "function platform() external view returns (address)",
+            "event LoanRequested(uint32 indexed loanId, address indexed borrower, uint256 timestamp)",
+            "event LoanApproved(uint32 indexed loanId, uint256 interestRate, uint256 duration)",
+            "event LoanFunded(uint32 indexed loanId, address indexed lender, uint256 timestamp)",
+            "event LenderDeposited(address indexed lender, uint256 amount)"
+        ];
+
+        // Global variables
+        let provider;
+        let signer;
+        let contract;
+        let userAccount;
+
+        // Initialize the application
+        window.addEventListener('load', async () => {
+            // Check if ethers is loaded
+            if (typeof ethers === 'undefined') {
+                showAlert('borrowAlert', 'Failed to load ethers.js library. Please refresh the page.', 'error');
+                return;
+            }
+
+            if (typeof window.ethereum !== 'undefined') {
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                setupEventListeners();
+                await checkConnection();
+            } else {
+                showAlert('borrowAlert', 'Please install MetaMask to use this application.', 'error');
+            }
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('connectWallet').addEventListener('click', connectWallet);
+            document.getElementById('loanRequestForm').addEventListener('submit', requestLoan);
+            document.getElementById('depositForm').addEventListener('submit', depositFunds);
+            document.getElementById('fundLoanForm').addEventListener('submit', fundLoan);
+            document.getElementById('approveLoanForm').addEventListener('submit', approveLoan);
+            document.getElementById('setAmountForm').addEventListener('submit', setLoanAmount);
+            document.getElementById('paymentForm').addEventListener('submit', makePayment);
+        }
+
+        // Check if wallet is already connected
+        async function checkConnection() {
+            try {
+                const accounts = await provider.listAccounts();
+                if (accounts.length > 0) {
+                    await connectWallet();
+                }
+            } catch (error) {
+                console.error('Error checking connection:', error);
+            }
+        }
+
+        // Connect wallet
+        async function connectWallet() {
+            try {
+                // Check if MetaMask is installed
+                if (!window.ethereum) {
+                    showAlert('borrowAlert', 'MetaMask is not installed. Please install MetaMask to continue.', 'error');
+                    return;
+                }
+
+                // Check if ethers is loaded
+                if (typeof ethers === 'undefined') {
+                    showAlert('borrowAlert', 'Ethers.js library failed to load. Please refresh the page.', 'error');
+                    return;
+                }
+
+                // Request account access
+                const accounts = await provider.send("eth_requestAccounts", []);
+                if (accounts.length === 0) {
+                    showAlert('borrowAlert', 'No accounts found. Please check your MetaMask.', 'error');
+                    return;
+                }
+
+                signer = provider.getSigner();
+                userAccount = await signer.getAddress();
+
+                // Check if contract address is set
+                if (CONTRACT_ADDRESS === "YOUR_CONTRACT_ADDRESS_HERE") {
+                    showAlert('borrowAlert', 'Contract address not configured. Please update CONTRACT_ADDRESS in the code.', 'error');
+                    return;
+                }
+
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+                await updateAccountInfo();
+                await updateLenderBalance();
+
+                document.getElementById('connectWallet').style.display = 'none';
+                document.getElementById('accountInfo').classList.remove('hidden');
+
+                showAlert('borrowAlert', 'Wallet connected successfully!', 'success');
+
+                // Listen for account changes
+                window.ethereum.on('accountsChanged', handleAccountsChanged);
+                window.ethereum.on('chainChanged', handleChainChanged);
+
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                let errorMessage = 'Failed to connect wallet: ';
+
+                if (error.code === 4001) {
+                    errorMessage += 'User rejected the connection request.';
+                } else if (error.code === -32002) {
+                    errorMessage += 'Connection request already pending. Please check MetaMask.';
+                } else {
+                    errorMessage += error.message;
+                }
+
+                showAlert('borrowAlert', errorMessage, 'error');
+            }
+        }
+
+        // Update account information
+        async function updateAccountInfo() {
+            try {
+                const balance = await provider.getBalance(userAccount);
+                const network = await provider.getNetwork();
+
+                document.getElementById('accountAddress').textContent =
+                    userAccount.substring(0, 6) + '...' + userAccount.substring(38);
+                document.getElementById('networkName').textContent = network.name || `Chain ID: ${network.chainId}`;
+                document.getElementById('accountBalance').textContent =
+                    parseFloat(ethers.utils.formatEther(balance)).toFixed(4);
+            } catch (error) {
+                console.error('Error updating account info:', error);
+            }
+        }
+
+        // Update lender balance
+        async function updateLenderBalance() {
+            try {
+                if (contract && userAccount) {
+                    const deposits = await contract.lenderDeposits(userAccount);
+                    document.getElementById('lenderDepositAmount').textContent =
+                        parseFloat(ethers.utils.formatEther(deposits)).toFixed(4);
+                }
+            } catch (error) {
+                console.error('Error updating lender balance:', error);
+            }
+        }
+
+        // Handle account changes
+        function handleAccountsChanged(accounts) {
+            if (accounts.length === 0) {
+                location.reload();
+            } else {
+                location.reload();
+            }
+        }
+
+        // Handle chain changes
+        function handleChainChanged(chainId) {
+            location.reload();
+        }
+
+        // Show alert message
+        function showAlert(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="alert ${type}">${message}</div>`;
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        // Show loading state
+        function showLoading(buttonId, loadingId) {
+            document.getElementById(buttonId).disabled = true;
+            document.getElementById(loadingId).classList.remove('hidden');
+        }
+
+        // Hide loading state
+        function hideLoading(buttonId, loadingId) {
+            document.getElementById(buttonId).disabled = false;
+            document.getElementById(loadingId).classList.add('hidden');
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Request loan
+        async function requestLoan(event) {
+            event.preventDefault();
+
+            if (!contract) {
+                showAlert('borrowAlert', 'Please connect your wallet first.', 'error');
+                return;
+            }
+
+            const amount = document.getElementById('loanAmount').value;
+            const duration = document.getElementById('loanDuration').value;
+
+            if (!amount || !duration) {
+                showAlert('borrowAlert', 'Please fill all fields.', 'error');
+                return;
+            }
+
+            showLoading('submitLoanBtn', 'loanLoading');
+
+            try {
+                // Convert ETH to wei for amount (but we need uint32 for the contract)
+                const amountInWei = ethers.utils.parseEther(amount);
+                const amountInGwei = Math.floor(amountInWei / 1e9); // Convert to smaller unit
+
+                const tx = await contract.requestLoan(amountInGwei, parseInt(duration));
+
+                showAlert('borrowAlert', 'Transaction submitted. Waiting for confirmation...', 'info');
+
+                await tx.wait();
+
+                showAlert('borrowAlert', `Loan requested successfully! Transaction hash: ${tx.hash}`, 'success');
+
+                // Reset form
+                document.getElementById('loanRequestForm').reset();
+
+            } catch (error) {
+                console.error('Error requesting loan:', error);
+                showAlert('borrowAlert', 'Error requesting loan: ' + error.message, 'error');
+            } finally {
+                hideLoading('submitLoanBtn', 'loanLoading');
+            }
+        }
+
+        // Deposit funds
+        async function depositFunds(event) {
+            event.preventDefault();
+
+            if (!contract) {
+                showAlert('lendAlert', 'Please connect your wallet first.', 'error');
+                return;
+            }
+
+            const amount = document.getElementById('depositAmount').value;
+
+            if (!amount) {
+                showAlert('lendAlert', 'Please enter deposit amount.', 'error');
+                return;
+            }
+
+            showLoading('depositForm', 'depositLoading');
+
+            try {
+                const value = ethers.utils.parseEther(amount);
+                const tx = await contract.depositFunds({ value });
+
+                showAlert('lendAlert', 'Transaction submitted. Waiting for confirmation...', 'info');
+
+                await tx.wait();
+
+                showAlert('lendAlert', `Funds deposited successfully! Transaction hash: ${tx.hash}`, 'success');
+
+                // Update balance and reset form
+                await updateLenderBalance();
+                await updateAccountInfo();
+                document.getElementById('depositForm').reset();
+
+            } catch (error) {
+                console.error('Error depositing funds:', error);
+                showAlert('lendAlert', 'Error depositing funds: ' + error.message, 'error');
+            } finally {
+                hideLoading('depositForm', 'depositLoading');
+            }
+        }
+
+        // Fund loan
+        async function fundLoan(event) {
+            event.preventDefault();
+
+            if (!contract) {
+                showAlert('lendAlert', 'Please connect your wallet first.', 'error');
+                return;
+            }
+
+            const loanId = document.getElementById('fundLoanId').value;
+            const amount = document.getElementById('fundAmount').value;
+
+            if (!loanId || !amount) {
+                showAlert('lendAlert', 'Please fill all fields.', 'error');
+                return;
+            }
+
+            showLoading('fundLoanForm', 'fundLoading');
+
+            try {
+                const amountInWei = ethers.utils.parseEther(amount);
+                const amountInGwei = Math.floor(amountInWei / 1e9);
+
+                const tx = await contract.fundLoan(parseInt(loanId), amountInGwei);
+
+                showAlert('lendAlert', 'Transaction submitted. Waiting for confirmation...', 'info');
+
+                await tx.wait();
+
+                showAlert('lendAlert', `Loan funded successfully! Transaction hash: ${tx.hash}`, 'success');
+
+                // Update balance and reset form
+                await updateLenderBalance();
+                await updateAccountInfo();
+                document.getElementById('fundLoanForm').reset();
+
+            } catch (error) {
+                console.error('Error funding loan:', error);
+                showAlert('lendAlert', 'Error funding loan: ' + error.message, 'error');
+            } finally {
+                hideLoading('fundLoanForm', 'fundLoading');
+            }
+        }
+
+        // Approve loan (platform only)
+        async function approveLoan(event) {
+            event.preventDefault();
+
+            if (!contract) {
+                showAlert('platformAlert', 'Please connect your wallet first.', 'error');
+                return;
+            }
+
+            const loanId = document.getElementById('approveLoanId').value;
+            const interestRate = document.getElementById('interestRate').value;
+
+            if (!loanId || !interestRate) {
+                showAlert('platformAlert', 'Please fill all fields.', 'error');
+                return;
+            }
+
+            showLoading('approveLoanForm', 'approveLoading');
+
+            try {
+                const tx = await contract.approveLoan(parseInt(loanId), parseInt(interestRate));
+
+                showAlert('platformAlert', 'Transaction submitted. Waiting for confirmation...', 'info');
+
+                await tx.wait();
+
+                showAlert('platformAlert', `Loan approved successfully! Transaction hash: ${tx.hash}`, 'success');
+
+                document.getElementById('approveLoanForm').reset();
+
+            } catch (error) {
+                console.error('Error approving loan:', error);
+                showAlert('platformAlert', 'Error approving loan: ' + error.message, 'error');
+            } finally {
+                hideLoading('approveLoanForm', 'approveLoading');
+            }
+        }
+
+        // Set loan amount (platform only)
+        async function setLoanAmount(event) {
+            event.preventDefault();
+
+            if (!contract) {
+                showAlert('platformAlert', 'Please connect your wallet first.', 'error');
+                return;
+            }
+
+            const loanId = document.getElementById('setAmountLoanId').value;
+            const amount = document.getElementById('setAmountValue').value;
+
+            if (!loanId || !amount) {
+                showAlert('platformAlert', 'Please fill all fields.', 'error');
+                return;
+            }
+
+            showLoading('setAmountForm', 'setAmountLoading');
+
+            try {
+                const amountInWei = ethers.utils.parseEther(amount);
+                const amountInGwei = Math.floor(amountInWei / 1e9);
+
+                const tx = await contract.setLoanAmount(parseInt(loanId), amountInGwei);
+
+                showAlert('platformAlert', 'Transaction submitted. Waiting for confirmation...', 'info');
+
+                await tx.wait();
+
+                showAlert('platformAlert', `Loan amount set successfully! Transaction hash: ${tx.hash}`, 'success');
+
+                document.getElementById('setAmountForm').reset();
+
+            } catch (error) {
+                console.error('Error setting loan amount:', error);
+                showAlert('platformAlert', 'Error setting loan amount: ' + error.message, 'error');
+            } finally {
+                hideLoading('setAmountForm', 'setAmountLoading');
+            }
+        }
+
+        // Make payment
+        async function makePayment(event) {
+            event.preventDefault();
+
+            if (!contract) {
+                showAlert('loansAlert', 'Please connect your wallet first.', 'error');
+                return;
+            }
+
+            const loanId = document.getElementById('paymentLoanId').value;
+            const amount = document.getElementById('paymentAmount').value;
+
+            if (!loanId || !amount) {
+                showAlert('loansAlert', 'Please fill all fields.', 'error');
+                return;
+            }
+
+            showLoading('paymentForm', 'paymentLoading');
+
+            try {
+                const value = ethers.utils.parseEther(amount);
+                const tx = await contract.makePayment(parseInt(loanId), { value });
+
+                showAlert('loansAlert', 'Transaction submitted. Waiting for confirmation...', 'info');
+
+                await tx.wait();
+
+                showAlert('loansAlert', `Payment made successfully! Transaction hash: ${tx.hash}`, 'success');
+
+                // Update account info and reset form
+                await updateAccountInfo();
+                document.getElementById('paymentForm').reset();
+
+                // Refresh loan details if displayed
+                if (document.getElementById('loanDetails').innerHTML) {
+                    await searchLoan();
+                }
+
+            } catch (error) {
+                console.error('Error making payment:', error);
+                showAlert('loansAlert', 'Error making payment: ' + error.message, 'error');
+            } finally {
+                hideLoading('paymentForm', 'paymentLoading');
+            }
+        }
+
+        // Search loan
+        async function searchLoan() {
+            const loanId = document.getElementById('searchLoanId').value;
+
+            if (!loanId) {
+                showAlert('loansAlert', 'Please enter a loan ID.', 'error');
+                return;
+            }
+
+            if (!contract) {
+                showAlert('loansAlert', 'Please connect your wallet first.', 'error');
+                return;
+            }
+
+            try {
+                const loanInfo = await contract.getLoanInfo(parseInt(loanId));
+                const loanDetails = await contract.loans(parseInt(loanId));
+
+                if (loanInfo[0] === ethers.constants.AddressZero) {
+                    showAlert('loansAlert', 'Loan not found.', 'error');
+                    return;
+                }
+
+                const [borrower, isApproved, isFunded, isRepaid] = loanInfo;
+                const [, , interestRate, durationMonths, , , createdAt, lender, totalRepaymentAmount, remainingBalance] = loanDetails;
+
+                let status = 'pending';
+                if (isRepaid) status = 'repaid';
+                else if (isFunded) status = 'funded';
+                else if (isApproved) status = 'approved';
+
+                const loanDetailsHtml = `
+                    <div class="loan-card">
+                        <h3>Loan #${loanId}</h3>
+                        <div class="loan-info">
+                            <div class="loan-info-item">
+                                <span>Borrower:</span>
+                                <span>${borrower.substring(0, 6)}...${borrower.substring(38)}</span>
+                            </div>
+                            <div class="loan-info-item">
+                                <span>Status:</span>
+                                <span class="status ${status}">${status}</span>
+                            </div>
+                            <div class="loan-info-item">
+                                <span>Duration:</span>
+                                <span>${durationMonths} months</span>
+                            </div>
+                            ${isApproved ? `
+                            <div class="loan-info-item">
+                                <span>Interest Rate:</span>
+                                <span>${(interestRate / 100).toFixed(2)}%</span>
+                            </div>
+                            ` : ''}
+                            ${isFunded ? `
+                            <div class="loan-info-item">
+                                <span>Lender:</span>
+                                <span>${lender.substring(0, 6)}...${lender.substring(38)}</span>
+                            </div>
+                            <div class="loan-info-item">
+                                <span>Total Repayment:</span>
+                                <span>${ethers.utils.formatEther(totalRepaymentAmount.mul(1e9))} ETH</span>
+                            </div>
+                            <div class="loan-info-item">
+                                <span>Remaining Balance:</span>
+                                <span>${ethers.utils.formatEther(remainingBalance.mul(1e9))} ETH</span>
+                            </div>
+                            ` : ''}
+                            <div class="loan-info-item">
+                                <span>Created:</span>
+                                <span>${new Date(createdAt * 1000).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('loanDetails').innerHTML = loanDetailsHtml;
+
+            } catch (error) {
+                console.error('Error searching loan:', error);
+                showAlert('loansAlert', 'Error searching loan: ' + error.message, 'error');
+            }
+        }
+
+        // Load borrower loans
+        async function loadBorrowerLoans() {
+            if (!contract || !userAccount) {
+                showAlert('loansAlert', 'Please connect your wallet first.', 'error');
+                return;
+            }
+
+            try {
+                const loanIds = await contract.getBorrowerLoans(userAccount);
+
+                if (loanIds.length === 0) {
+                    document.getElementById('borrowerLoansList').innerHTML =
+                        '<p>You have no loans.</p>';
+                    return;
+                }
+
+                let loansHtml = '';
+
+                for (let i = 0; i < loanIds.length; i++) {
+                    const loanId = loanIds[i];
+                    const loanInfo = await contract.getLoanInfo(loanId);
+                    const loanDetails = await contract.loans(loanId);
+
+                    const [borrower, isApproved, isFunded, isRepaid] = loanInfo;
+                    const [, , interestRate, durationMonths, , , createdAt, lender, totalRepaymentAmount, remainingBalance] = loanDetails;
+
+                    let status = 'pending';
+                    if (isRepaid) status = 'repaid';
+                    else if (isFunded) status = 'funded';
+                    else if (isApproved) status = 'approved';
+
+                    loansHtml += `
+                        <div class="loan-card">
+                            <h3>Loan #${loanId}</h3>
+                            <div class="loan-info">
+                                <div class="loan-info-item">
+                                    <span>Status:</span>
+                                    <span class="status ${status}">${status}</span>
+                                </div>
+                                <div class="loan-info-item">
+                                    <span>Duration:</span>
+                                    <span>${durationMonths} months</span>
+                                </div>
+                                ${isApproved ? `
+                                <div class="loan-info-item">
+                                    <span>Interest Rate:</span>
+                                    <span>${(interestRate / 100).toFixed(2)}%</span>
+                                </div>
+                                ` : ''}
+                                ${isFunded ? `
+                                <div class="loan-info-item">
+                                    <span>Remaining Balance:</span>
+                                    <span>${ethers.utils.formatEther(remainingBalance.mul(1e9))} ETH</span>
+                                </div>
+                                ` : ''}
+                                <div class="loan-info-item">
+                                    <span>Created:</span>
+                                    <span>${new Date(createdAt * 1000).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('borrowerLoansList').innerHTML = loansHtml;
+
+            } catch (error) {
+                console.error('Error loading borrower loans:', error);
+                showAlert('loansAlert', 'Error loading your loans: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
