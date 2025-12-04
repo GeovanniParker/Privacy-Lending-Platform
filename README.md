@@ -16,7 +16,7 @@ Enable anonymous, privacy-centric lending where:
 - **Transactions are confidential** - Payment information stays encrypted
 - **Smart contracts operate on encrypted data** - No data exposure during computation
 
-Video : https://streamable.com/kv59z6
+Video : https://streamable.com/kv59z6  demo.mp4
 
 Live Demo:https://privacy-lending-platform.vercel.app/
 
