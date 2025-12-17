@@ -170,6 +170,77 @@ const EXAMPLES: Record<string, ExampleConfig> = {
     contractFile: 'LendingInputProofs.sol',
     testFile: 'InputProofs.test.ts',
     useCaseDescription: 'Accept encrypted loan amount requests from users with proper validation, preventing manipulation and ensuring data integrity.'
+  },
+  'fhe-counter': {
+    name: 'fhe-counter',
+    title: 'FHE Counter - Basic Encrypted Counter',
+    description: 'Simple encrypted counter demonstrating fundamental FHEVM operations',
+    concept: 'An encrypted counter is the "Hello World" of FHEVM development. This example shows how to increment and decrement encrypted values while maintaining privacy.',
+    learningObjectives: [
+      'Understand basic FHE operations (add, sub)',
+      'Learn proper permission management',
+      'Work with encrypted state variables',
+      'Handle encrypted inputs with proofs'
+    ],
+    fhevmFeatures: [
+      'FHE.add() - Encrypted addition',
+      'FHE.sub() - Encrypted subtraction',
+      'FHE.asEuint32() - Convert to encrypted type',
+      'FHE.allowThis() - Contract permissions',
+      'FHE.allow() - User permissions'
+    ],
+    chapter: 'basic',
+    difficulty: 'beginner',
+    contractFile: 'FHECounter.sol',
+    testFile: 'FHECounter.test.ts',
+    useCaseDescription: 'A simple counter where the value remains encrypted, demonstrating how to perform basic arithmetic operations on encrypted data without revealing the actual count.'
+  },
+  'encrypt-value': {
+    name: 'encrypt-value',
+    title: 'Encrypt Single Value - Encryption Patterns',
+    description: 'Learn how to encrypt and store different types of values securely',
+    concept: 'FHEVM supports multiple encrypted types (euint8, euint32, euint64). This example demonstrates how to choose the right type and properly encrypt user data with input proofs.',
+    learningObjectives: [
+      'Choose appropriate encrypted types (euint8 vs euint32 vs euint64)',
+      'Handle input proofs correctly',
+      'Convert plaintext to encrypted types',
+      'Manage per-user encrypted storage'
+    ],
+    fhevmFeatures: [
+      'euint8 - 8-bit encrypted integers (0-255)',
+      'euint32 - 32-bit encrypted integers',
+      'euint64 - 64-bit encrypted integers',
+      'FHE.asEuint8/32/64() - Type conversion',
+      'Input proof validation'
+    ],
+    chapter: 'encryption',
+    difficulty: 'beginner',
+    contractFile: 'EncryptValue.sol',
+    testFile: 'EncryptValue.test.ts',
+    useCaseDescription: 'Store user balances, ages, or other sensitive values in encrypted form, choosing the optimal encrypted type for gas efficiency while maintaining privacy.'
+  },
+  'public-decryption': {
+    name: 'public-decryption',
+    title: 'Public Decryption - Gateway Pattern',
+    description: 'Decrypt encrypted values for public visibility using gateway/relayer pattern',
+    concept: 'Public decryption allows encrypted values to be revealed publicly when needed, such as auction winners or vote tallies. This uses a gateway service to perform the decryption.',
+    learningObjectives: [
+      'Understand gateway/relayer decryption pattern',
+      'Request public decryption of encrypted values',
+      'Handle decryption callbacks',
+      'Design reveal mechanisms for auctions and votes'
+    ],
+    fhevmFeatures: [
+      'Gateway decryption pattern',
+      'Public value reveal',
+      'Callback handling',
+      'Batch decryption for multiple values'
+    ],
+    chapter: 'decryption',
+    difficulty: 'intermediate',
+    contractFile: 'PublicDecryption.sol',
+    testFile: 'PublicDecryption.test.ts',
+    useCaseDescription: 'Reveal auction winners, vote tallies, or lottery results by decrypting values publicly after a threshold or event, while keeping them private during the active period.'
   }
 };
 
